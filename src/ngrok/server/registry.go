@@ -3,11 +3,11 @@ package server
 import (
 	"encoding/gob"
 	"fmt"
-	"strings"
 	"net"
+	"net/url"
 	"ngrok/cache"
 	"ngrok/log"
-	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
@@ -172,11 +172,11 @@ func (r *TunnelRegistry) get(reg_url string) *Tunnel {
 	url_parts := strings.Split(url_object.Host, ".")
 
 	for len(url_parts) > 1 && r.tunnels[test_url] == nil {
-		url_parts = url_parts[1 : len(url_parts)]
+		url_parts = url_parts[1:len(url_parts)]
 		test_url = fmt.Sprintf("%s://%s", url_object.Scheme, strings.Join(url_parts, "."))
 	}
 
-  return r.tunnels[test_url]
+	return r.tunnels[test_url]
 }
 
 // ControlRegistry maps a client ID to Control structures
