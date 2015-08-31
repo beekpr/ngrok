@@ -83,7 +83,7 @@ func (r *TunnelRegistry) Register(url string, t *Tunnel) error {
 	r.Lock()
 	defer r.Unlock()
 
-	if r.Get(url) != nil {
+	if r.get(url) != nil {
 		return fmt.Errorf("The tunnel %s is already registered.", url)
 	}
 
@@ -159,6 +159,10 @@ func (r *TunnelRegistry) Del(url string) {
 func (r *TunnelRegistry) Get(reg_url string) *Tunnel {
 	r.RLock()
 	defer r.RUnlock()
+	return r.get(reg_url)
+}
+
+func (r *TunnelRegistry) get(reg_url string) *Tunnel {
 	url_object, _ := url.Parse(reg_url)
 	if url_object == nil {
 		return nil
