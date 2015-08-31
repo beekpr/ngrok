@@ -171,15 +171,12 @@ func (r *TunnelRegistry) get(reg_url string) *Tunnel {
 	test_url := reg_url
 	url_parts := strings.Split(url_object.Host, ".")
 
-	for len(test_url) > 0 && r.tunnels[test_url] == nil {
-		url_parts = url_parts[1:len(url_parts)-1]
+	for len(url_parts) > 1 && r.tunnels[test_url] == nil {
+		url_parts = url_parts[1 : len(url_parts)]
 		test_url = fmt.Sprintf("%s://%s", url_object.Scheme, strings.Join(url_parts, "."))
 	}
 
-	if len(test_url) > 0 {
-		return r.tunnels[test_url]
-	}
-	return nil
+  return r.tunnels[test_url]
 }
 
 // ControlRegistry maps a client ID to Control structures
