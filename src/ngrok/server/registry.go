@@ -3,9 +3,11 @@ package server
 import (
 	"encoding/gob"
 	"fmt"
+	"strings"
 	"net"
 	"ngrok/cache"
 	"ngrok/log"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -81,7 +83,7 @@ func (r *TunnelRegistry) Register(url string, t *Tunnel) error {
 	r.Lock()
 	defer r.Unlock()
 
-	if r.tunnels[url] != nil {
+	if r.Get(url) != nil {
 		return fmt.Errorf("The tunnel %s is already registered.", url)
 	}
 
@@ -154,10 +156,26 @@ func (r *TunnelRegistry) Del(url string) {
 	delete(r.tunnels, url)
 }
 
-func (r *TunnelRegistry) Get(url string) *Tunnel {
+func (r *TunnelRegistry) Get(reg_url string) *Tunnel {
 	r.RLock()
 	defer r.RUnlock()
-	return r.tunnels[url]
+	url_object, _ := url.Parse(reg_url)
+	if url_object == nil {
+		return nil
+	}
+
+	test_url := reg_url
+	url_parts := strings.Split(url_object.Host, ".")
+
+	for len(test_url) > 0 && r.tunnels[test_url] == nil {
+		url_parts = url_parts[1:len(url_parts)-1]
+		test_url = fmt.Sprintf("%s://%s", url_object.Scheme, strings.Join(url_parts, "."))
+	}
+
+	if len(test_url) > 0 {
+		return r.tunnels[test_url]
+	}
+	return nil
 }
 
 // ControlRegistry maps a client ID to Control structures
